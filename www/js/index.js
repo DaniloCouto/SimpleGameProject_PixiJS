@@ -29,7 +29,10 @@ var app = {
     var scoreText = new PIXI.Text(score, { font: '16px Arial', fill: 0xffffff, align: 'center' })
     var screenText = new PIXI.Text(score, { font: '16px Arial', fill: 0xffffff, align: 'center' })
     var countDownText = new PIXI.Text('3', { font: '4rem Arial', fill: 0xffffff, align: 'center' })
-    var watchID
+    scoreText.anchor = new PIXI.Point(0.5, 0.5)
+    screenText.anchor = new PIXI.Point(0.5, 0.5)
+    countDownText.anchor = new PIXI.Point(0.5, 0.5)
+    var watchID;
     var stage = new PIXI.Container()
     var gameStoped = true
     const SHAKE_SENSIBILITY = 20
@@ -85,7 +88,7 @@ var app = {
     function goalBoxSpawn () {
       var randomX = Math.floor((Math.random() * renderer.width))
       var randomY = Math.floor((Math.random() * renderer.height))
-      while (verfyPlayerLocationAbstract(randomX, randomY)) {
+      while (verfyPlayerLocationAbstract(randomX, randomY),verifyEnemiesLocatonsAbstract(randomX, randomY)) {
         randomX = Math.floor((Math.random() * renderer.width))
         randomY = Math.floor((Math.random() * renderer.height))
       }
@@ -116,6 +119,18 @@ var app = {
         let element = enemies[index]
         if (element.position.x - circle.position.x > -element.width / 2 && element.position.x - circle.position.x < element.width / 2) {
           if (element.position.y - circle.position.y > -element.height / 2 && element.position.y - circle.position.y < element.height / 2) {
+            return true
+          }
+        } else if (index === enemies.length - 1) {
+          return false
+        }
+      }
+    }
+    function verifyEnemiesLocatonsAbstract(x,y) {
+      for (let index = 0; index < enemies.length; index++) {
+        let element = enemies[index]
+        if (element.position.x - x > -element.width && element.position.x - x < element.width ) {
+          if (element.position.y - y > -element.height && element.position.y - y < element.height ) {
             return true
           }
         } else if (index === enemies.length - 1) {
@@ -195,7 +210,7 @@ var app = {
       }
       stage.removeChild(scoreText)
       screenText.text = 'Sua pontuação foi ' + score + '\n Sua maior pontuação é de ' + maxScore + '\n Chacoalhe para recomeçar'
-      screenText.x = renderer.width / 4
+      screenText.x = renderer.width / 2
       screenText.y = renderer.height / 2
       stage.addChild(screenText)
       shake.startWatch(function () {
@@ -221,7 +236,7 @@ var app = {
     function onPause () {
       stopGame()
       screenText.text = 'Jogo Pausado \n Chacoalhe para Recomeçar'
-      screenText.x = renderer.width / 4
+      screenText.x = renderer.width / 2
       screenText.y = renderer.height / 2
       stage.addChild(screenText)
       shake.startWatch(function () {
@@ -240,7 +255,6 @@ var app = {
     }
 
     function resumeGame () {
-      shake.stopWatch()
       watchID = navigator.accelerometer.watchAcceleration(onSuccess, onError, { frequency: 20 })
       window.powerManagement.acquire(function () {
         console.log('Wakelock released')
@@ -252,7 +266,7 @@ var app = {
 
     function initGame () {
       screenText.text = 'Chacoalhe para começar'
-      screenText.x = renderer.width / 4
+      screenText.x = renderer.width / 2
       screenText.y = renderer.height / 2
       stage.addChild(screenText)
       shake.startWatch(function () {
@@ -261,6 +275,7 @@ var app = {
     }
 
     function startCountDown (callback) {
+      shake.stopWatch()
       countDownText.text = '3'
       stage.removeChild(screenText)
       stage.addChild(countDownText)
